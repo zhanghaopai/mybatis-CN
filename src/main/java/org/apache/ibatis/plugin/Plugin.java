@@ -41,7 +41,14 @@ public class Plugin implements InvocationHandler {
     this.signatureMap = signatureMap;
   }
 
+  /**
+   * 将某个拦截器与四大对象相关联
+   * @param target Mybatis中的四大对象
+   * @param interceptor 拦截器链路中的某个拦截器
+   * @return
+   */
   public static Object wrap(Object target, Interceptor interceptor) {
+    // 获取拦截器@Interceptor{@Signature()}注解中配置的要拦截的类及方法
     Map<Class<?>, Set<Method>> signatureMap = getSignatureMap(interceptor);
     Class<?> type = target.getClass();
     Class<?>[] interfaces = getAllInterfaces(type, signatureMap);
@@ -87,16 +94,31 @@ public class Plugin implements InvocationHandler {
     return signatureMap;
   }
 
-  private static Class<?>[] getAllInterfaces(Class<?> type, Map<Class<?>, Set<Method>> signatureMap) {
+  /**
+   * 查看四大对象实现的接口中，是否具有signatureMap想要拦截的类，并返回该类
+   * 这一步主要是在去除无用的信息，比如用户填写了我想要拦截ResultSettttHandler，
+   * 但是四大对象中根本没有人实现这个类，主要就是去除这些无用的信息
+   * @param type Mybatis中四大对象的类
+   * @param signatureMap 注解Interceptor{@Signature()}中配置的想要拦截的类及方法
+   * @return
+   */
+  private static Class<?>[] getAllInterfaces(Class<?> type,
+                                             Map<Class<?>, Set<Method>> signatureMap) {
+    // 最后的结果集
     Set<Class<?>> interfaces = new HashSet<>();
+    // 获取当前类及其父类，直到继承关系的顶层
     while (type != null) {
+      // 获取当前类实现的接口
       for (Class<?> c : type.getInterfaces()) {
+        // 如果希望被拦截的接口中，当前对象实现了该接口，那么就将其加入结果中
         if (signatureMap.containsKey(c)) {
           interfaces.add(c);
         }
       }
+      // 获取超类，返回循环头
       type = type.getSuperclass();
     }
+    // 因Set具有不重复的特点，用其去重，现转换为数组。
     return interfaces.toArray(new Class<?>[0]);
   }
 
