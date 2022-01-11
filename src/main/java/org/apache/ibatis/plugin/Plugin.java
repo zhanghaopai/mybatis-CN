@@ -51,13 +51,17 @@ public class Plugin implements InvocationHandler {
     // 获取拦截器@Interceptor{@Signature()}注解中配置的要拦截的类及方法
     Map<Class<?>, Set<Method>> signatureMap = getSignatureMap(interceptor);
     Class<?> type = target.getClass();
+    // 查看当前对象实现了signatureMap中哪些类
     Class<?>[] interfaces = getAllInterfaces(type, signatureMap);
     if (interfaces.length > 0) {
+      // 如果需要拦截当前对象，则返回动态代理对象，动态代理对象在执行所有方法时，都会走Plugin的invoke方法，
+      // 通过判断执行的方法是否在signatureMap中，从而实现特定类的特定方法拦截
       return Proxy.newProxyInstance(
           type.getClassLoader(),
           interfaces,
           new Plugin(target, interceptor, signatureMap));
     }
+    // 如果当前拦截器不需要拦截当前对象，则直接返回对象，不返回动态代理对象
     return target;
   }
 
