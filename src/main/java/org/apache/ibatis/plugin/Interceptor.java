@@ -18,6 +18,7 @@ package org.apache.ibatis.plugin;
 import java.util.Properties;
 
 /**
+ * 拦截器门面，所有的拦截器必须实现该门面
  * @author Clinton Begin
  */
 public interface Interceptor {
