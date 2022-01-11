@@ -22,6 +22,9 @@ import org.apache.ibatis.plugin.Intercepts;
 import org.apache.ibatis.plugin.Invocation;
 import org.apache.ibatis.plugin.Plugin;
 
+/**
+ * 拦截器示例
+ */
 @Intercepts({})
 public class ExamplePlugin implements Interceptor {
   private Properties properties;
